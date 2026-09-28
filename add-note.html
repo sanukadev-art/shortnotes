@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add New Note Bundle</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+  <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md">
+    <h1 class="text-xl font-bold mb-4 text-gray-800">➕ Add New Note Bundle</h1>
+
+    <form id="noteForm" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Subject</label>
+        <input type="text" id="subject" placeholder="e.g. Science, History, Commerce" class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" required>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Bundle Title</label>
+        <input type="text" id="title" placeholder="e.g. O/L Science - Units 1, 2 & 3 Notes" class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" required>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Description</label>
+        <textarea id="description" placeholder="Brief summary of what's inside..." class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" rows="2"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Price (LKR)</label>
+        <input type="number" id="price" placeholder="350" class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" required>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Google Drive PDF Link</label>
+        <input type="url" id="pdfUrl" placeholder="https://drive.google.com/file/d/..." class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" required>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700">
+        Publish Note to Store
+      </button>
+    </form>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCOPEfTlcktSv7QluO-GR5WGrh1G2Eh5Cg",
+      authDomain: "short-notes-2e6da.firebaseapp.com",
+      databaseURL: "https://short-notes-2e6da-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "short-notes-2e6da",
+      storageBucket: "short-notes-2e6da.firebasestorage.app",
+      messagingSenderId: "906989363134",
+      appId: "1:906989363134:web:f7e49da044b5b0cfe763ef",
+      measurementId: "G-GF26VH6ECD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    document.getElementById('noteForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const subject = document.getElementById('subject').value.trim();
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const price = Number(document.getElementById('price').value);
+      const pdfUrl = document.getElementById('pdfUrl').value.trim();
+
+      // Create a unique ID key from the title
+      const noteId = subject.toLowerCase() + '_' + Date.now();
+
+      set(ref(db, 'notes/' + noteId), {
+        id: noteId,
+        subject: subject,
+        title: title,
+        description: description,
+        price: price,
+        pdfUrl: pdfUrl,
+        timestamp: new Date().toISOString()
+      }).then(() => {
+        alert("Note bundle published successfully!");
+        document.getElementById('noteForm').reset();
+      }).catch((err) => {
+        alert("Error adding note: " + err.message);
+      });
+    });
+  </script>
+</body>
+</html>
