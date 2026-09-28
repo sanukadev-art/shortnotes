@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>O/L Quick Notes Store</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen pb-12">
+
+  <!-- Header -->
+  <header class="bg-blue-600 text-white p-6 shadow-md text-center">
+    <h1 class="text-2xl font-bold">📚 O/L Exam Notes Hub</h1>
+    <p class="text-blue-100 text-sm mt-1">Short notes & summary guides for Sri Lankan O/L Students</p>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 mt-8">
+    <h2 class="text-xl font-semibold mb-4">Select a Note Package</h2>
+    
+    <!-- Note Item Card -->
+    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center mb-4">
+      <div>
+        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-semibold">Science</span>
+        <h3 class="text-lg font-bold mt-1">O/L Science Grade 11 Short Notes (PDF)</h3>
+        <p class="text-gray-500 text-sm">Covering all major units with handwritten diagrams & formulas.</p>
+        <p class="text-blue-600 font-bold mt-2">LKR 350</p>
+      </div>
+      <button onclick="openModal('O/L Science Grade 11 Short Notes', 350)" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+        Buy Note
+      </button>
+    </div>
+  </main>
+
+  <!-- Checkout Modal -->
+  <div id="checkoutModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative">
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 text-xl font-bold">&times;</button>
+      
+      <!-- Step 1: Request Order -->
+      <div id="step1">
+        <h3 class="text-lg font-bold mb-2">Checkout: <span id="noteTitle"></span></h3>
+        <p class="text-sm text-gray-600 mb-4">Enter your phone number to generate your order number.</p>
+        <input type="text" id="buyerPhone" placeholder="07X XXX XXXX" class="w-full border p-2 rounded mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
+        <button onclick="createOrder()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700">Generate Payment Order</button>
+      </div>
+
+      <!-- Step 2: Payment Instructions -->
+      <div id="step2" class="hidden text-center">
+        <div class="bg-green-100 text-green-800 p-2 rounded mb-4 font-semibold">
+          Order Created ID: <span id="orderIdDisplay" class="text-xl underline"></span>
+        </div>
+        <p class="text-xs text-gray-500 mb-2">Scan LANKAQR to pay LKR <span id="priceDisplay"></span>:</p>
+
+        <!-- Replace with your actual LankaQR Image link -->
+        <img src="https://via.placeholder.com/200?text=LANKAQR+Image" alt="LankaQR" class="w-48 h-48 mx-auto border p-1 rounded mb-4">
+
+        <p class="text-xs text-gray-600 mb-4">After scanning, send your receipt + Order ID on WhatsApp to confirm.</p>
+        <a id="whatsappBtn" target="_blank" class="block w-full bg-green-500 text-white py-3 rounded-lg font-bold hover:bg-green-600 text-center">
+          📱 Send Receipt on WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCOPEfTlcktSv7QluO-GR5WGrh1G2Eh5Cg",
+      authDomain: "short-notes-2e6da.firebaseapp.com",
+      databaseURL: "https://short-notes-2e6da-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "short-notes-2e6da",
+      storageBucket: "short-notes-2e6da.firebasestorage.app",
+      messagingSenderId: "906989363134",
+      appId: "1:906989363134:web:f7e49da044b5b0cfe763ef",
+      measurementId: "G-GF26VH6ECD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let selectedNote = '';
+    let selectedPrice = 0;
+
+    window.openModal = function(title, price) {
+      selectedNote = title;
+      selectedPrice = price;
+      document.getElementById('noteTitle').innerText = title;
+      document.getElementById('checkoutModal').classList.remove('hidden');
+    };
+
+    window.closeModal = function() {
+      document.getElementById('checkoutModal').classList.add('hidden');
+      document.getElementById('step1').classList.remove('hidden');
+      document.getElementById('step2').classList.add('hidden');
+    };
+
+    window.createOrder = function() {
+      const phone = document.getElementById('buyerPhone').value.trim();
+      if(!phone) { alert("Please enter your phone number."); return; }
+
+      const currentOrderId = Math.floor(100000 + Math.random() * 900000).toString();
+
+      set(ref(db, 'orders/' + currentOrderId), {
+        orderId: currentOrderId,
+        noteTitle: selectedNote,
+        price: selectedPrice,
+        phone: phone,
+        status: 'pending',
+        timestamp: new Date().toISOString()
+      }).then(() => {
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+        document.getElementById('orderIdDisplay').innerText = "#" + currentOrderId;
+        document.getElementById('priceDisplay').innerText = selectedPrice;
+
+        // Replace with your real WhatsApp number (including country code 94)
+        const myWhatsAppNumber = "947XXXXXXXX"; 
+        const message = `Hi! I paid for Order %23${currentOrderId} (${selectedNote}). Here is my transfer receipt.`;
+        document.getElementById('whatsappBtn').href = `https://wa.me/${myWhatsAppNumber}?text=${message}`;
+      }).catch((err) => {
+        alert("Error creating order: " + err.message);
+      });
+    };
+  </script>
+</body>
+</html>
