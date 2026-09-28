@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Order Verification</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md">
+    <div class="flex justify-between items-center border-b pb-4 mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">⚙️ Owner Order Dashboard</h1>
+      <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded font-bold">Live DB Connected</span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b text-gray-500 text-sm bg-gray-50">
+            <th class="p-3">Order ID</th>
+            <th class="p-3">Item</th>
+            <th class="p-3">Phone</th>
+            <th class="p-3">Amount</th>
+            <th class="p-3">Status</th>
+            <th class="p-3 text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTable">
+          <!-- Orders stream here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCOPEfTlcktSv7QluO-GR5WGrh1G2Eh5Cg",
+      authDomain: "short-notes-2e6da.firebaseapp.com",
+      databaseURL: "https://short-notes-2e6da-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "short-notes-2e6da",
+      storageBucket: "short-notes-2e6da.firebasestorage.app",
+      messagingSenderId: "906989363134",
+      appId: "1:906989363134:web:f7e49da044b5b0cfe763ef",
+      measurementId: "G-GF26VH6ECD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Map your note titles to Google Drive PDF links
+    const pdfLinks = {
+      "O/L Science Grade 11 Short Notes": "https://drive.google.com/file/d/YOUR_PDF_FILE_ID/view?usp=sharing"
+    };
+
+    onValue(ref(db, 'orders'), (snapshot) => {
+      const data = snapshot.val();
+      const tableBody = document.getElementById('ordersTable');
+      tableBody.innerHTML = '';
+
+      if (!data) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-400">No orders placed yet.</td></tr>';
+        return;
+      }
+
+      Object.keys(data).reverse().forEach(id => {
+        const order = data[id];
+        const isApproved = order.status === 'approved';
+
+        const row = `
+          <tr class="border-b text-sm">
+            <td class="p-3 font-bold text-blue-600">#${order.orderId}</td>
+            <td class="p-3 font-medium">${order.noteTitle}</td>
+            <td class="p-3 text-gray-500">${order.phone}</td>
+            <td class="p-3 font-bold">LKR ${order.price}</td>
+            <td class="p-3">
+              <span class="${isApproved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'} text-xs font-bold px-2 py-1 rounded">
+                ${order.status.toUpperCase()}
+              </span>
+            </td>
+            <td class="p-3 text-right">
+              ${isApproved 
+                ? `<a href="${pdfLinks[order.noteTitle] || '#'}" target="_blank" class="text-xs bg-gray-100 text-blue-600 underline px-2 py-1 rounded">View PDF Link</a>`
+                : `<button onclick="approveOrder('${order.orderId}')" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded font-bold hover:bg-green-700">Approve Order</button>`
+              }
+            </td>
+          </tr>
+        `;
+        tableBody.innerHTML += row;
+      });
+    });
+
+    window.approveOrder = function(orderId) {
+      update(ref(db, 'orders/' + orderId), { status: 'approved' }).then(() => {
+        alert(`Order #${orderId} approved!`);
+      });
+    };
+  </script>
+</body>
+</html>
