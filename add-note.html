@@ -3,18 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add New Note Bundle</title>
+  <title>Admin - Add Note Bundle</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
 
-  <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md">
+  <!-- Security Access Denied Screen (Shown by default) -->
+  <div id="deniedScreen" class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md text-center mt-12">
+    <h2 class="text-xl font-bold text-red-600 mb-2">🔒 Access Denied</h2>
+    <p class="text-sm text-gray-600">You do not have permission to access this upload portal directly.</p>
+  </div>
+
+  <!-- Admin Form (Hidden until key is verified) -->
+  <div id="adminFormContainer" class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md hidden">
     <h1 class="text-xl font-bold mb-4 text-gray-800">➕ Add New Note Bundle</h1>
 
     <form id="noteForm" class="space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-700">Subject</label>
-        <input type="text" id="subject" placeholder="e.g. Science, History, Commerce" class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" required>
+        <input type="text" id="subject" placeholder="e.g. Science, History" class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" required>
       </div>
 
       <div>
@@ -24,7 +31,7 @@
 
       <div>
         <label class="block text-sm font-medium text-gray-700">Description</label>
-        <textarea id="description" placeholder="Brief summary of what's inside..." class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" rows="2"></textarea>
+        <textarea id="description" placeholder="Brief summary..." class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" rows="2"></textarea>
       </div>
 
       <div>
@@ -33,8 +40,8 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700">Google Drive PDF Link</label>
-        <input type="url" id="pdfUrl" placeholder="https://drive.google.com/file/d/..." class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" required>
+        <label class="block text-sm font-medium text-gray-700">PDF Storage Link (Supabase / Drive)</label>
+        <input type="url" id="pdfUrl" placeholder="https://..." class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" required>
       </div>
 
       <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700">
@@ -47,6 +54,22 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+    // 1. SET YOUR SECRET ACCESS KEY HERE
+    const SECRET_KEY = "admin1234"; // Change this to your preferred secret passphrase
+
+    // 2. CHECK URL PARAMETER FOR THE KEY
+    const urlParams = new URLSearchParams(window.location.search);
+    const providedKey = urlParams.get('key');
+
+    if (providedKey === SECRET_KEY) {
+      document.getElementById('deniedScreen').classList.add('hidden');
+      document.getElementById('adminFormContainer').classList.remove('hidden');
+    } else {
+      // If key is wrong or missing, keep the page blocked
+      document.getElementById('deniedScreen').classList.remove('hidden');
+    }
+
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCOPEfTlcktSv7QluO-GR5WGrh1G2Eh5Cg",
       authDomain: "short-notes-2e6da.firebaseapp.com",
@@ -70,8 +93,7 @@
       const price = Number(document.getElementById('price').value);
       const pdfUrl = document.getElementById('pdfUrl').value.trim();
 
-      // Create a unique ID key from the title
-      const noteId = subject.toLowerCase() + '_' + Date.now();
+      const noteId = subject.toLowerCase().replace(/[^a-z0-9]/g, '') + '_' + Date.now();
 
       set(ref(db, 'notes/' + noteId), {
         id: noteId,
