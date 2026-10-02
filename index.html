@@ -3,243 +3,306 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Short Notes Store</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>O/L Hub — Short Notes & Past Papers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --accent-blue: #38bdf8;
+      --accent-emerald: #34d399;
+      --accent-amber: #fbbf24;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 2rem 1rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Header Section */
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #38bdf8 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    /* Navigation / Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .tab-btn {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 0.6rem 1.4rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      border-color: var(--accent-blue);
+    }
+
+    .tab-btn.active {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+
+    /* Grid Layout */
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Resource Cards */
+    .resource-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .resource-card:hover {
+      transform: translateY(-4px);
+      border-color: #475569;
+      box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Resource Type Badges */
+    .card-badge {
+      align-self: flex-start;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+
+    .badge-notes {
+      background-color: rgba(56, 189, 248, 0.15);
+      color: var(--accent-blue);
+    }
+
+    .badge-papers {
+      background-color: rgba(52, 211, 153, 0.15);
+      color: var(--accent-emerald);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
+    }
+
+    .card-description {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Card Footer & CTAs */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1rem;
+      margin-top: auto;
+    }
+
+    .price-tag {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-main);
+    }
+
+    .price-tag.free {
+      color: var(--accent-emerald);
+    }
+
+    .action-btn {
+      background-color: var(--accent-blue);
+      color: #0f172a;
+      border: none;
+      padding: 0.55rem 1.1rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .action-btn:hover {
+      opacity: 0.9;
+    }
+
+    .action-btn.secondary {
+      background-color: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+    }
+
+    .action-btn.secondary:hover {
+      border-color: var(--text-muted);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      header h1 {
+        font-size: 2rem;
+      }
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col justify-between font-sans">
+<body>
 
-  <!-- Navigation Bar -->
-  <header class="bg-white border-b sticky top-0 z-40 shadow-sm">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-lg">
-          <i class="fa-solid fa-book-open"></i>
-        </div>
+  <div class="container">
+    <header>
+      <h1>G.C.E. O/L Revision Hub</h1>
+      <p>High-yield short notes & official past papers for fast revision</p>
+    </header>
+
+    <!-- Filter Buttons -->
+    <div class="filter-tabs">
+      <button class="tab-btn active" onclick="filterResources('all')">All Resources</button>
+      <button class="tab-btn" onclick="filterResources('notes')">Short Notes</button>
+      <button class="tab-btn" onclick="filterResources('papers')">Past Papers</button>
+    </div>
+
+    <!-- Resource Cards Container -->
+    <div class="content-grid">
+
+      <!-- Short Note Card 1 -->
+      <div class="resource-card" data-category="notes">
         <div>
-          <h1 class="text-xl font-extrabold text-gray-900 tracking-tight">ShortNotes.lk</h1>
-          <p class="text-xs text-gray-500">High-Yield Revision Bundles</p>
+          <span class="card-badge badge-notes">Short Notes</span>
+          <h2 class="card-title">O/L Science — Unit 1-5 Summary</h2>
+          <p class="card-description">Includes high-yield practical diagrams, key chemistry equations, and physics formulas condensed onto 8 clean pages.</p>
+        </div>
+        <div class="card-footer">
+          <span class="price-tag">LKR 350</span>
+          <a href="#" class="action-btn">Get Notes</a>
         </div>
       </div>
-      
-      
-    </div>
-  </header>
 
-  <!-- Main Content Container -->
-  <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
-
-    <!-- Hero Banner -->
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl p-6 sm:p-8 mb-8 shadow-md">
-      <h2 class="text-2xl sm:text-3xl font-extrabold mb-2">Master Your Subjects Faster</h2>
-      <p class="text-blue-100 text-sm sm:text-base max-w-2xl mb-4">
-        Concise, exam-focused revision notes designed to maximize your marks in minimum time.
-      </p>
-      <div class="flex flex-wrap gap-4 text-xs font-semibold text-blue-200">
-        <span class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-green-400"></i> Instant PDF Delivery</span>
-        <span class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-green-400"></i> High-Yield Summaries</span>
-        <span class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-green-400"></i> Verified Content</span>
-      </div>
-    </div>
-
-    <!-- Filter & Header Bar -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-      <div>
-        <h3 class="text-xl font-bold text-gray-900">Available Note Bundles</h3>
-        <p class="text-sm text-gray-500">Select a bundle to purchase via WhatsApp</p>
+      <!-- Past Paper Card 1 -->
+      <div class="resource-card" data-category="papers">
+        <div>
+          <span class="card-badge badge-papers">Past Paper</span>
+          <h2 class="card-title">2023 O/L Mathematics Paper I & II</h2>
+          <p class="card-description">Official Sinhala medium examination paper along with step-by-step marking scheme answers.</p>
+        </div>
+        <div class="card-footer">
+          <span class="price-tag free">FREE</span>
+          <a href="#" class="action-btn secondary">Download PDF</a>
+        </div>
       </div>
 
-      <!-- Subject Filter Pills -->
-      <div id="filterContainer" class="flex flex-wrap gap-2">
-        <button onclick="filterNotes('All')" class="filter-btn active bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-sm transition">
-          All
-        </button>
+      <!-- Short Note Card 2 -->
+      <div class="resource-card" data-category="notes">
+        <div>
+          <span class="card-badge badge-notes">Short Notes</span>
+          <h2 class="card-title">O/L History — Full Timeline Chart</h2>
+          <p class="card-description">Chronological summary of key historical eras, treaties, and rulers required for quick essay recall.</p>
+        </div>
+        <div class="card-footer">
+          <span class="price-tag">LKR 300</span>
+          <a href="#" class="action-btn">Get Notes</a>
+        </div>
       </div>
-    </div>
 
-    <!-- Notes Grid -->
-    <div id="notesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Loading Skeleton / Placeholder -->
-      <div class="col-span-full py-16 text-center">
-        <i class="fa-solid fa-spinner animate-spin text-3xl text-blue-600 mb-3"></i>
-        <p class="text-gray-500 text-sm font-medium">Fetching available notes from database...</p>
+      <!-- Past Paper Card 2 -->
+      <div class="resource-card" data-category="papers">
+        <div>
+          <span class="card-badge badge-papers">Past Paper</span>
+          <h2 class="card-title">2022 O/L Science Past Paper + Marking</h2>
+          <p class="card-description">Complete Paper I (MCQ) & Paper II structured essay questions with standard marking criteria.</p>
+        </div>
+        <div class="card-footer">
+          <span class="price-tag free">FREE</span>
+          <a href="#" class="action-btn secondary">Download PDF</a>
+        </div>
       </div>
+
     </div>
+  </div>
 
-  </main>
+  <script>
+    // Simple front-end filtering script
+    function filterResources(category) {
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
 
-  <!-- Footer -->
-  <footer class="bg-white border-t py-6 mt-12">
-    <div class="max-w-6xl mx-auto px-4 text-center text-xs text-gray-500">
-      <p>© 2026 ShortNotes.lk — All rights reserved.</p>
-    </div>
-  </footer>
-
-  <!-- Firebase Integration Script -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-    // Your Firebase Configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyCOPEfTlcktSv7QluO-GR5WGrh1G2Eh5Cg",
-      authDomain: "short-notes-2e6da.firebaseapp.com",
-      databaseURL: "https://short-notes-2e6da-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "short-notes-2e6da",
-      storageBucket: "short-notes-2e6da.firebasestorage.app",
-      messagingSenderId: "906989363134",
-      appId: "1:906989363134:web:f7e49da044b5b0cfe763ef",
-      measurementId: "G-GF26VH6ECD"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const notesGrid = document.getElementById('notesGrid');
-    const filterContainer = document.getElementById('filterContainer');
-
-    let allNotes = {};
-    let activeFilter = 'All';
-
-    // Set your WhatsApp phone number here (include country code without + or spaces, e.g., 947XXXXXXXX)
-    const WHATSAPP_NUMBER = "94700000000"; 
-
-    // Listen for real-time updates from the "notes" node
-    onValue(ref(db, 'notes'), (snapshot) => {
-      if (!snapshot.exists()) {
-        notesGrid.innerHTML = `
-          <div class="col-span-full bg-white border border-dashed rounded-xl p-8 text-center">
-            <i class="fa-solid fa-folder-open text-4xl text-gray-300 mb-2"></i>
-            <p class="text-gray-600 font-medium">No note bundles available right now.</p>
-            <p class="text-xs text-gray-400 mt-1">Use add-note.html to publish your first bundle.</p>
-          </div>`;
-        return;
-      }
-
-      allNotes = snapshot.val();
-      updateFilterButtons();
-      renderNotes();
-    }, (error) => {
-      console.error(error);
-      notesGrid.innerHTML = `
-        <div class="col-span-full bg-red-50 text-red-600 p-4 rounded-xl text-center text-sm font-medium">
-          Error loading data: ${error.message}
-        </div>`;
-    });
-
-    // Extract subjects dynamically to create filter buttons
-    function updateFilterButtons() {
-      const subjects = new Set(['All']);
-      Object.values(allNotes).forEach(note => {
-        if (note.subject) subjects.add(note.subject.trim());
+      const cards = document.querySelectorAll('.resource-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-category') === category) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
       });
-
-      filterContainer.innerHTML = '';
-      subjects.forEach(subject => {
-        const btn = document.createElement('button');
-        const isActive = activeFilter === subject;
-        btn.className = `px-3 py-1 rounded-full text-xs font-semibold transition ${
-          isActive 
-            ? 'bg-blue-600 text-white shadow-sm' 
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-        }`;
-        btn.textContent = subject;
-        btn.onclick = () => {
-          activeFilter = subject;
-          updateFilterButtons();
-          renderNotes();
-        };
-        filterContainer.appendChild(btn);
-      });
-    }
-
-    // Render cards into grid based on active filter
-    function renderNotes() {
-      notesGrid.innerHTML = '';
-
-      const filteredKeys = Object.keys(allNotes).filter(key => {
-        const note = allNotes[key];
-        return activeFilter === 'All' || note.subject === activeFilter;
-      });
-
-      if (filteredKeys.length === 0) {
-        notesGrid.innerHTML = `
-          <div class="col-span-full bg-white border rounded-xl p-8 text-center text-gray-500 text-sm">
-            No notes found under the subject "${activeFilter}".
-          </div>`;
-        return;
-      }
-
-      filteredKeys.forEach(key => {
-        const note = allNotes[key];
-        const card = document.createElement('div');
-        card.className = "bg-white border rounded-xl shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between relative overflow-hidden";
-
-        card.innerHTML = `
-          <div>
-            <div class="flex justify-between items-start mb-2">
-              <span class="inline-block bg-blue-50 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-md border border-blue-100">
-                ${note.subject || 'General'}
-              </span>
-              <span class="text-xs text-gray-400"><i class="fa-regular fa-file-pdf text-red-500 mr-1"></i>PDF</span>
-            </div>
-
-            <h4 class="text-lg font-bold text-gray-900 mb-2 leading-snug">${escapeHtml(note.title || 'Untitled Note')}</h4>
-            <p class="text-gray-600 text-sm mb-4 line-clamp-3">${escapeHtml(note.description || 'No detailed description provided.')}</p>
-          </div>
-
-          <div class="pt-4 border-t flex items-center justify-between mt-2">
-            <div>
-              <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400 block">Price</span>
-              <span class="text-xl font-extrabold text-emerald-600">LKR ${note.price || 0}</span>
-            </div>
-            
-            <button 
-              data-title="${escapeHtml(note.title)}"
-              data-price="${note.price}"
-              class="buy-btn bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-4 py-2.5 rounded-lg transition flex items-center gap-2 shadow-sm">
-              <i class="fa-brands fa-whatsapp text-lg"></i> Buy Now
-            </button>
-          </div>
-        `;
-
-        notesGrid.appendChild(card);
-      });
-
-      // Attach click events for buying
-      document.querySelectorAll('.buy-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const target = e.currentTarget;
-          const title = target.getAttribute('data-title');
-          const price = target.getAttribute('data-price');
-          purchaseNote(title, price);
-        });
-      });
-    }
-
-    // Redirect to WhatsApp with a pre-filled order message
-    function purchaseNote(title, price) {
-      const message = `Hi! I would like to buy the following note bundle from ShortNotes.lk:\n\n` +
-                      `📌 *Title:* ${title}\n` +
-                      `💵 *Price:* LKR ${price}\n\n` +
-                      `Please let me know your payment details!`;
-
-      const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-    }
-
-    // Helper to escape standard string characters safely
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
     }
   </script>
+
 </body>
 </html>
