@@ -24,7 +24,9 @@
         </div>
       </div>
       
-      
+      <a href="add-note.html?key=admin1234" target="_blank" class="text-sm font-medium text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 transition">
+        <i class="fa-solid fa-plus mr-1"></i> Admin Panel
+      </a>
     </div>
   </header>
 
@@ -38,8 +40,8 @@
         Concise, exam-focused revision notes designed to maximize your marks in minimum time.
       </p>
       <div class="flex flex-wrap gap-4 text-xs font-semibold text-blue-200">
-        <span class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-green-400"></i> Instant PDF Delivery</span>
-        <span class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-green-400"></i> High-Yield Summaries</span>
+        <span class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-green-400"></i> Free Sample Previews</span>
+        <span class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-green-400"></i> Instant PDF Access</span>
         <span class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-green-400"></i> Verified Content</span>
       </div>
     </div>
@@ -48,7 +50,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
         <h3 class="text-xl font-bold text-gray-900">Available Note Bundles</h3>
-        <p class="text-sm text-gray-500">Select a bundle to purchase via WhatsApp</p>
+        <p class="text-sm text-gray-500">Preview notes or click Buy to order via WhatsApp</p>
       </div>
 
       <!-- Subject Filter Pills -->
@@ -61,7 +63,6 @@
 
     <!-- Notes Grid -->
     <div id="notesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Loading Skeleton / Placeholder -->
       <div class="col-span-full py-16 text-center">
         <i class="fa-solid fa-spinner animate-spin text-3xl text-blue-600 mb-3"></i>
         <p class="text-gray-500 text-sm font-medium">Fetching available notes from database...</p>
@@ -69,6 +70,22 @@
     </div>
 
   </main>
+
+  <!-- PDF PREVIEW MODAL -->
+  <div id="previewModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl max-w-4xl w-full h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-4 border-b flex justify-between items-center bg-gray-50">
+        <div>
+          <h3 id="modalTitle" class="font-bold text-gray-800 text-base">Note Preview</h3>
+          <p class="text-xs text-gray-500">Viewing free sample pages</p>
+        </div>
+        <button onclick="closePreviewModal()" class="text-gray-400 hover:text-red-500 text-2xl font-bold transition px-2">&times;</button>
+      </div>
+      <div class="flex-1 w-full bg-gray-200">
+        <iframe id="previewIframe" src="" class="w-full h-full border-none"></iframe>
+      </div>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer class="bg-white border-t py-6 mt-12">
@@ -82,7 +99,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    // Your Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCOPEfTlcktSv7QluO-GR5WGrh1G2Eh5Cg",
       authDomain: "short-notes-2e6da.firebaseapp.com",
@@ -94,7 +110,6 @@
       measurementId: "G-GF26VH6ECD"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
@@ -104,17 +119,14 @@
     let allNotes = {};
     let activeFilter = 'All';
 
-    // Set your WhatsApp phone number here (include country code without + or spaces, e.g., 947XXXXXXXX)
     const WHATSAPP_NUMBER = "94700000000"; 
 
-    // Listen for real-time updates from the "notes" node
     onValue(ref(db, 'notes'), (snapshot) => {
       if (!snapshot.exists()) {
         notesGrid.innerHTML = `
           <div class="col-span-full bg-white border border-dashed rounded-xl p-8 text-center">
             <i class="fa-solid fa-folder-open text-4xl text-gray-300 mb-2"></i>
             <p class="text-gray-600 font-medium">No note bundles available right now.</p>
-            <p class="text-xs text-gray-400 mt-1">Use add-note.html to publish your first bundle.</p>
           </div>`;
         return;
       }
@@ -130,7 +142,6 @@
         </div>`;
     });
 
-    // Extract subjects dynamically to create filter buttons
     function updateFilterButtons() {
       const subjects = new Set(['All']);
       Object.values(allNotes).forEach(note => {
@@ -156,7 +167,6 @@
       });
     }
 
-    // Render cards into grid based on active filter
     function renderNotes() {
       notesGrid.innerHTML = '';
 
@@ -191,25 +201,44 @@
             <p class="text-gray-600 text-sm mb-4 line-clamp-3">${escapeHtml(note.description || 'No detailed description provided.')}</p>
           </div>
 
-          <div class="pt-4 border-t flex items-center justify-between mt-2">
-            <div>
+          <div class="pt-4 border-t mt-2">
+            <div class="mb-3">
               <span class="text-[10px] uppercase tracking-wider font-semibold text-gray-400 block">Price</span>
               <span class="text-xl font-extrabold text-emerald-600">LKR ${note.price || 0}</span>
             </div>
             
-            <button 
-              data-title="${escapeHtml(note.title)}"
-              data-price="${note.price}"
-              class="buy-btn bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-4 py-2.5 rounded-lg transition flex items-center gap-2 shadow-sm">
-              <i class="fa-brands fa-whatsapp text-lg"></i> Buy Now
-            </button>
+            <div class="grid grid-cols-2 gap-2">
+              <button 
+                data-preview="${escapeHtml(note.previewUrl || note.pdfUrl || '#')}"
+                data-title="${escapeHtml(note.title)}"
+                class="preview-btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-sm py-2 rounded-lg transition flex items-center justify-center gap-1.5 border border-gray-300">
+                <i class="fa-solid fa-eye text-gray-500"></i> Preview
+              </button>
+
+              <button 
+                data-title="${escapeHtml(note.title)}"
+                data-price="${note.price}"
+                class="buy-btn bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-2 rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm">
+                <i class="fa-brands fa-whatsapp text-lg"></i> Buy
+              </button>
+            </div>
           </div>
         `;
 
         notesGrid.appendChild(card);
       });
 
-      // Attach click events for buying
+      // Preview button event handlers
+      document.querySelectorAll('.preview-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const target = e.currentTarget;
+          const previewUrl = target.getAttribute('data-preview');
+          const title = target.getAttribute('data-title');
+          openPreviewModal(previewUrl, title);
+        });
+      });
+
+      // Buy button event handlers
       document.querySelectorAll('.buy-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const target = e.currentTarget;
@@ -220,7 +249,18 @@
       });
     }
 
-    // Redirect to WhatsApp with a pre-filled order message
+    function openPreviewModal(url, title) {
+      document.getElementById('modalTitle').textContent = title + ' (Sample Preview)';
+      let embedUrl = url.replace('/view', '/preview');
+      document.getElementById('previewIframe').src = embedUrl;
+      document.getElementById('previewModal').classList.remove('hidden');
+    }
+
+    window.closePreviewModal = function() {
+      document.getElementById('previewModal').classList.add('hidden');
+      document.getElementById('previewIframe').src = '';
+    };
+
     function purchaseNote(title, price) {
       const message = `Hi! I would like to buy the following note bundle from ShortNotes.lk:\n\n` +
                       `📌 *Title:* ${title}\n` +
@@ -231,7 +271,6 @@
       window.open(whatsappUrl, '_blank');
     }
 
-    // Helper to escape standard string characters safely
     function escapeHtml(str) {
       return String(str)
         .replace(/&/g, "&amp;")
