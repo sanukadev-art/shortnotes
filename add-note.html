@@ -8,13 +8,13 @@
 </head>
 <body class="bg-gray-100 p-6">
 
-  <!-- Security Access Denied Screen (Shown by default) -->
+  <!-- Security Access Denied Screen -->
   <div id="deniedScreen" class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md text-center mt-12">
     <h2 class="text-xl font-bold text-red-600 mb-2">🔒 Access Denied</h2>
     <p class="text-sm text-gray-600">You do not have permission to access this upload portal directly.</p>
   </div>
 
-  <!-- Admin Form (Hidden until key is verified) -->
+  <!-- Admin Form -->
   <div id="adminFormContainer" class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md hidden">
     <h1 class="text-xl font-bold mb-4 text-gray-800">➕ Add New Note Bundle</h1>
 
@@ -39,12 +39,19 @@
         <input type="number" id="price" placeholder="350" class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" required>
       </div>
 
+      <!-- PUBLIC SAMPLE / PREVIEW LINK -->
       <div>
-        <label class="block text-sm font-medium text-gray-700">PDF Storage Link (Supabase / Drive)</label>
-        <input type="url" id="pdfUrl" placeholder="https://..." class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" required>
+        <label class="block text-sm font-medium text-gray-700">Sample Preview PDF Link (Public - First 2-3 Pages)</label>
+        <input type="url" id="previewUrl" placeholder="https://drive.google.com/file/d/.../view" class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" required>
       </div>
 
-      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700">
+      <!-- FULL LOCKED PDF LINK -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Full Paid PDF Storage Link (Private Document)</label>
+        <input type="url" id="pdfUrl" placeholder="https://drive.google.com/file/d/.../view" class="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-blue-500" required>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition">
         Publish Note to Store
       </button>
     </form>
@@ -54,10 +61,9 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    // 1. SET YOUR SECRET ACCESS KEY HERE
-    const SECRET_KEY = "admin1234"; // Change this to your preferred secret passphrase
+    // Secret key for admin access
+    const SECRET_KEY = "admin1234"; 
 
-    // 2. CHECK URL PARAMETER FOR THE KEY
     const urlParams = new URLSearchParams(window.location.search);
     const providedKey = urlParams.get('key');
 
@@ -65,11 +71,9 @@
       document.getElementById('deniedScreen').classList.add('hidden');
       document.getElementById('adminFormContainer').classList.remove('hidden');
     } else {
-      // If key is wrong or missing, keep the page blocked
       document.getElementById('deniedScreen').classList.remove('hidden');
     }
 
-    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCOPEfTlcktSv7QluO-GR5WGrh1G2Eh5Cg",
       authDomain: "short-notes-2e6da.firebaseapp.com",
@@ -91,6 +95,7 @@
       const title = document.getElementById('title').value.trim();
       const description = document.getElementById('description').value.trim();
       const price = Number(document.getElementById('price').value);
+      const previewUrl = document.getElementById('previewUrl').value.trim();
       const pdfUrl = document.getElementById('pdfUrl').value.trim();
 
       const noteId = subject.toLowerCase().replace(/[^a-z0-9]/g, '') + '_' + Date.now();
@@ -101,6 +106,7 @@
         title: title,
         description: description,
         price: price,
+        previewUrl: previewUrl,
         pdfUrl: pdfUrl,
         timestamp: new Date().toISOString()
       }).then(() => {
